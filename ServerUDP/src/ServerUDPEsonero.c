@@ -41,13 +41,11 @@ float division(int,int);
 	 int sock;
 	 struct sockaddr_in echoServAddr;
 	 struct sockaddr_in echoClntAddr;
-	 unsigned int cliAddrLen;
-	 char echoBuffer[ECHOMAX];
+	 int cliAddrLen;
 	 int recvMsgSize;
 	 struct hostent *host;
-	 char nameServer[ECHOMAX];
 	 struct Operation op;
-	 int port;
+
 
 
 	 // CREAZIONE DELLA SOCKET
@@ -102,9 +100,10 @@ float division(int,int);
 		    }
 		}
 	 }
-	    closesocket(sock);
-	    clearwinsock();
-	    return 0;
+
+   closesocket(sock);
+   clearwinsock();
+    return 0;
  }
 
 

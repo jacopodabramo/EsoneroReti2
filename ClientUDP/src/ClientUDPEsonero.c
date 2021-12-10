@@ -31,7 +31,7 @@ int main(int argc,char *argv[]) {
 	int sock;
 	struct sockaddr_in echoServAddr;
 	struct sockaddr_in fromAddr;
-	unsigned int fromSize;
+	int fromSize;
 	char echoString[ECHOMAX];
 	//char echoBuffer[ECHOMAX];
 	//int echoStringLen;
@@ -45,17 +45,24 @@ int main(int argc,char *argv[]) {
 	memset(&echoServAddr, 0, sizeof(echoServAddr));
 	echoServAddr.sin_family = PF_INET;
 
+
 	if(argc > 1){
 				//command line values
-				if(tokenizer(argv[1],nameServer,&port) == 0) return -1; //input string is not in the correct form
-				host = gethostbyname(nameServer);
-				if (host == NULL) {
-					 fprintf(stderr, "gethostbyname() failed.\n");
-					 exit(EXIT_FAILURE);
+				if(tokenizer(argv[1],nameServer,&port) == 0){
+					//default values
+					printf("The input string is not in correct form, using default values \n");
+					echoServAddr.sin_port = htons(PORT);
+					echoServAddr.sin_addr.s_addr = inet_addr(ADDR);
+				}else{
+					host = gethostbyname(nameServer);
+					if (host == NULL) {
+						fprintf(stderr, "gethostbyname() failed.\n");
+						exit(EXIT_FAILURE);
+					}
+					struct in_addr* ina = (struct in_addr*) host->h_addr_list[0];
+					echoServAddr.sin_port = htons(port);
+					echoServAddr.sin_addr.s_addr = inet_addr(inet_ntoa(*ina));
 				}
-				struct in_addr* ina = (struct in_addr*) host->h_addr_list[0];
-				echoServAddr.sin_port = htons(port);
-				echoServAddr.sin_addr.s_addr = inet_addr(inet_ntoa(*ina));
     }
 	else{
 	 	    	//default values
@@ -92,7 +99,7 @@ int main(int argc,char *argv[]) {
 
 	 //receiving data from server
 	 fromSize = sizeof(fromAddr);
-	 respStringLen = recvfrom(sock, (char *) (float*)&a, ECHOMAX, 0, (struct sockaddr*)&fromAddr, &fromSize);
+	 respStringLen = recvfrom(sock, (char *) (float*)&a, ECHOMAX, 0,(struct sockaddr*)&fromAddr, &fromSize);
 	 if (echoServAddr.sin_addr.s_addr != fromAddr.sin_addr.s_addr){
 	 	 fprintf(stderr, "Error: received a packet from unknown source.\n");
 	 	 exit(EXIT_FAILURE);
@@ -103,7 +110,7 @@ int main(int argc,char *argv[]) {
 	     		printf("Error division by zero\n");
 	 } else {
 
-		 printf("Ricevuto risultato dal server: %s, ip: %s: %d %c %d = %f\n", host->h_name,inet_ntoa(fromAddr.sin_addr),msg.number1,msg.op,msg.number2,a);
+		 printf("Ricevuto risultato dal server: %s, ip: %s: %d %c %d = %.2f\n", host->h_name,inet_ntoa(fromAddr.sin_addr),msg.number1,msg.op,msg.number2,a);
 	 }
 
  }
