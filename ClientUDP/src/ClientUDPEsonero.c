@@ -11,40 +11,49 @@
 #include <string.h>
 #include <float.h>
 
+//Prototypes
 void printMessage(int);
+
 int checkOp(char);
+
 int check(char [], struct Operation *);
+
 int number(char);
+
 int tokenizer(char [],char [],int *);
 
 int main(int argc,char *argv[]) {
 
 	#if defined WIN32
+
 	WSADATA wsaData;
 	int iResult = WSAStartup(MAKEWORD(2 ,2), &wsaData);
+
 	if (iResult != 0) {
 	 printf ("error at WSASturtup\n");
 	 return EXIT_FAILURE;
 	}
- 	 #endif
 
+ 	#endif
+
+	//Connection variables initialization
 	int sock;
 	struct sockaddr_in echoServAddr;
 	struct sockaddr_in fromAddr;
 	int fromSize;
 	char echoString[ECHOMAX];
-	//char echoBuffer[ECHOMAX];
-	//int echoStringLen;
 	int respStringLen;
-	struct Operation msg;
 	struct hostent *host;
 	char nameServer[ECHOMAX];
 	int port;
 
-	//COSTRUZIONE INDIRIZZO SERVER
+	//message to Server variables initialization
+	struct Operation msg;
+
+
+	//Server's address
 	memset(&echoServAddr, 0, sizeof(echoServAddr));
 	echoServAddr.sin_family = PF_INET;
-
 
 	if(argc > 1){
 				//command line values
@@ -70,13 +79,14 @@ int main(int argc,char *argv[]) {
 				echoServAddr.sin_addr.s_addr = inet_addr(ADDR);
 	}
 
- // CREAZIONE DELLA SOCKET
+ //Socket's creation
  if ((sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
 	 ErrorHandler("socket() failed");
 
  while(1){
 	 //getting operation
 	 int k = 1;
+
 	 do {
 	 	printMessage(k);
 	 	fgets(echoString,sizeof(echoString),stdin);
@@ -87,6 +97,7 @@ int main(int argc,char *argv[]) {
 	 	printf("first operator = %d\n", msg.number1);
 	 	printf("second operator  = %d\n", msg.number2);
 	 }
+
 	 //sending data to server
 	 if (sendto(sock, (char*)(struct Operation*)&msg, (int)sizeof(struct Operation), 0, (struct sockaddr*)&echoServAddr, sizeof(echoServAddr)) !=  (int)sizeof(struct Operation))
 	  	 ErrorHandler("Errors during sending");
@@ -109,8 +120,8 @@ int main(int argc,char *argv[]) {
 	 if(msg.op == '/' && a == FLT_MAX  ) {
 	     		printf("Error division by zero\n");
 	 } else {
-
-		 printf("Ricevuto risultato dal server: %s, ip: %s: %d %c %d = %.2f\n", host->h_name,inet_ntoa(fromAddr.sin_addr),msg.number1,msg.op,msg.number2,a);
+		 if(respStringLen < 0) printf("no data has been received\n");
+		 else printf("Received result from server: %s, ip: %s: %d %c %d = %.2f\n", host->h_name,inet_ntoa(fromAddr.sin_addr),msg.number1,msg.op,msg.number2,a);
 	 }
 
  }
@@ -120,6 +131,16 @@ int main(int argc,char *argv[]) {
  	 //return EXIT_SUCCESS;
 }
 
+/*
+ * Parameters:
+ *              input: a string
+ *              nameServer: is a reference to save the name of Server
+ *              port: is a reference to save the port's number
+ * Return:
+ *              integer:1 if the string is in a correct form
+ *                      0 otherwise
+ *
+ */
 int tokenizer(char input[],char nameServer[],int *port){
     if(input[0] == ':') return 0;
     char p[100];
@@ -143,6 +164,14 @@ int tokenizer(char input[],char nameServer[],int *port){
     return 1;
 }
 
+/*
+ *Parameters:
+ *             character
+ *Return:
+ *             1 if the caracter is a number
+ *             0 otherwise
+ *
+ */
 int number(char toVerify){
     if(toVerify == '0' || toVerify == '1' || toVerify == '2' ||
         toVerify == '3' || toVerify == '4' || toVerify == '5' ||
@@ -151,6 +180,13 @@ int number(char toVerify){
     return 0;
 }
 
+/*
+ * Parameters:
+ *             integer:k value to understand which kind of message should be printed
+ *
+ * Return:
+ *             void function, it prints the message
+ */
 void printMessage(int k){
 	if(k == 1) {
 		printf("Enter a command in a format:[operation] [first operate] [second operate] \n");
@@ -162,11 +198,26 @@ void printMessage(int k){
 	}
 }
 
+/*
+ * Parameters:
+ *             a: character
+ * Return:
+ *             integer: 1 if input is an operation,
+ *                      0 otherwise
+ */
 int checkOp(char a){
     if(a == '+' ||  a == 'x' || a == '/' ||  a == '-') return 1;
     return 0;
 }
 
+/*
+ * Parameters:
+ *             in: User's message
+ *             op: mapping user's message to operation struct
+ * Return:
+ *             integer: 1 if user's message is valid
+ *                      0 otherwise
+ */
 int check(char in[], struct Operation *op) {
 	if(checkOp(in[0]) == 1 && in[1] == ' '){
 		op->op = in[0];

@@ -29,30 +29,37 @@ float division(int,int);
 
 
  int main(int argc, char* argv[]) {
+
  	 #if defined WIN32
+
 	 WSADATA wsaData;
 	 int iResult = WSAStartup(MAKEWORD(2 ,2), &wsaData);
+
 	 if (iResult != 0) {
 		 	 printf ("error at WSASturtup\n");
 		 	 return EXIT_FAILURE;
 	 }
+
  	 #endif
 
+	 //Connection variables initialization
 	 int sock;
 	 struct sockaddr_in echoServAddr;
 	 struct sockaddr_in echoClntAddr;
 	 int cliAddrLen;
 	 int recvMsgSize;
 	 struct hostent *host;
+
+	 //message from client variable initialization
 	 struct Operation op;
 
 
 
-	 // CREAZIONE DELLA SOCKET
+	 //Socket's creation
 	 if ((sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0)
 		 	 ErrorHandler("socket() failed");
 
-	 //INDIRIZZO DEL SERVER
+	 //Server's address
 	 memset(&echoServAddr, 0, sizeof(echoServAddr));
 	 echoServAddr.sin_family = AF_INET;
 	 if(argc > 1){
@@ -66,44 +73,44 @@ float division(int,int);
 	 				echoServAddr.sin_addr.s_addr = inet_addr(ADDR);
 	 	}
 
-	 // BIND DELLA SOCKET
+	 //Socket's bind
 	 if ((bind(sock, (struct sockaddr *)&echoServAddr, sizeof(echoServAddr))) < 0)
 		 ErrorHandler("bind() failed");
 
-	 // RICEZIONE DELLA STRINGA ECHO DAL CLIENT
+
 	 while(1) {
-		 printf("Waiting for a client...\n");
+		printf("Waiting for a client...\n");
+
 		while(1){
-		 cliAddrLen = sizeof(echoClntAddr);
-		 if((recvMsgSize = recvfrom(sock,(char*)(struct Operation*)&op, sizeof(struct Operation), 0, (struct sockaddr*)&echoClntAddr, &cliAddrLen)) != sizeof(struct Operation)){
-			 ErrorHandler("recvfrom() receive different number of bytes than expected");
-			 return -1;
-		 }
-		 host = gethostbyaddr((char *) &(echoClntAddr.sin_addr), 4, AF_INET);
-
-
-		 if(op.op == '=') {
-			 printf("Richiesta operazione '%c dal client %s, ip %s\n",op.op,host->h_name,inet_ntoa(echoClntAddr.sin_addr));
-		     printf("\n");
-		     break;
-		 }
-		 else {
-			 printf("Richiesta operazione '%c %d %d' dal client %s, ip %s\n",op.op,op.number1,op.number2,host->h_name,inet_ntoa(echoClntAddr.sin_addr));
-		     // Calculating the result
-		     float result = calculator(op);
-
-		     // Sending result
-		     if ((recvMsgSize = sendto(sock, (char*)(float*)&result, sizeof(float), 0, (struct sockaddr *)&echoClntAddr,sizeof(echoClntAddr))) !=  sizeof(float)){
-		    	 	 	 	 ErrorHandler("sendto() sent different number of bytes than expected");
-		     	 	 	 	 return -1;
+			//receiving data from client
+		    cliAddrLen = sizeof(echoClntAddr);
+		    if((recvMsgSize = recvfrom(sock,(char*)(struct Operation*)&op, sizeof(struct Operation), 0, (struct sockaddr*)&echoClntAddr, &cliAddrLen)) != sizeof(struct Operation)){
+			    ErrorHandler("recvfrom() receive different number of bytes than expected");
+			    return -1;
 		     }
-		    }
-		}
-	 }
+		     host = gethostbyaddr((char *) &(echoClntAddr.sin_addr), 4, AF_INET);
+
+		     if(op.op == '=') {
+			    printf("Client's operation request '%c' from %s, ip %s\n",op.op,host->h_name,inet_ntoa(echoClntAddr.sin_addr));
+		        printf("\n");
+		        break;
+		      }
+		      else {
+			     printf("Client's operation request '%c %d %d' from %s, ip %s\n",op.op,op.number1,op.number2,host->h_name,inet_ntoa(echoClntAddr.sin_addr));
+		         // Calculating the result
+		         float result = calculator(op);
+
+		         // Sending result
+		         if ((recvMsgSize = sendto(sock, (char*)(float*)&result, sizeof(float), 0, (struct sockaddr *)&echoClntAddr,sizeof(echoClntAddr))) !=  sizeof(float)){
+		    	 	 ErrorHandler("sendto() sent different number of bytes than expected");
+		     	 	 return -1;
+		         }
+		      }
+		 }
+	  }
 
    closesocket(sock);
-   clearwinsock();
-    return 0;
+       return 0;
  }
 
 
