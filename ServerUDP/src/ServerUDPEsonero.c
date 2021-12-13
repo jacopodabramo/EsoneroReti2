@@ -49,6 +49,8 @@ float division(int,int);
 	 int cliAddrLen;
 	 int recvMsgSize;
 	 struct hostent *host;
+	 char nameServer[ECHOMAX];
+	 int port;
 
 	 //message from client variable initialization
 	 struct Operation op;
@@ -63,9 +65,22 @@ float division(int,int);
 	 memset(&echoServAddr, 0, sizeof(echoServAddr));
 	 echoServAddr.sin_family = AF_INET;
 	 if(argc > 1){
-	 			//command line values
-	 			echoServAddr.sin_port = htons(atoi(argv[2]));
-	 			echoServAddr.sin_addr.s_addr = inet_addr(argv[1]);
+			//command line values
+			if(tokenizer(argv[1],nameServer,&port) == 0){
+				//default values
+				printf("The input string is not in correct form, using default values \n");
+				echoServAddr.sin_port = htons(PORT);
+				echoServAddr.sin_addr.s_addr = inet_addr(ADDR);
+			}else{
+				host = gethostbyname(nameServer);
+				if (host == NULL) {
+					fprintf(stderr, "gethostbyname() failed.\n");
+					exit(EXIT_FAILURE);
+				}
+				struct in_addr* ina = (struct in_addr*) host->h_addr_list[0];
+				echoServAddr.sin_port = htons(port);
+				echoServAddr.sin_addr.s_addr = inet_addr(inet_ntoa(*ina));
+			}
 	     }
 	 	else{
 	 	 	    	//default values
