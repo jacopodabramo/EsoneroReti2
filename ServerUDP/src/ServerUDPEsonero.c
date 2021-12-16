@@ -1,6 +1,9 @@
 #if defined WIN32
+
 #include <winsock.h>
+
 #else
+
 #define closesocket close
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -8,6 +11,7 @@
 #include <unistd.h>
 #include <netinet/in.h>
 #include <netdb.h>
+
 #endif
 
 #include <float.h>
