@@ -15,9 +15,9 @@ La _divisione per zero_ visto che è un'operazione che non può essere svolta, s
 
 Per evitare che l'utente inserisse dei valori troppo elevati che causerebbero un _overflow_ si è deciso che l'utente può inserire un range di valori che va da -10.000 a + 10.000 .<br><br>
 
-Per questione grafiche  si è deciso di stampare le prime due cifre decimali dopo  la virgola nel _Client_.<br><br>
+Per questione grafiche  si è deciso di stampare le prime tre cifre decimali dopo  la virgola nel _Client_.<br><br>
 
-_All' avvio_, al Client può essere passato un parametro da _Comand Line_ nel seguente formato <code>srv.di.uniba.it:56700</code>.<br>
+_All' avvio_, sia al Client che al Server può essere passato un parametro da _Comand Line_ nel seguente formato <code>srv.di.uniba.it:56700</code>.<br>
 La prima parte della stringa fino ai <code>:</code> indica il nome del Server, la seconda parte della stringa indica  _il numero di porta_; nei casi in cui la stringa si dovesse trovare in un formato errato (_Es_ <code>srv.di.uniba.it:56ab0</code> ), oppure non dovesse essere passato questo parametro verrano utilizzati _indirizzo ip_ e _numero di porta_ di default corrispondenti a:
 - _127.0.0.1 per l'indirizzo ip_ 
 - _56700 per il numero di porta_ <br><br>
