@@ -3,8 +3,11 @@
 #else
 #define closesocket close
 #include <sys/socket.h>
+#include <sys/types.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <netinet/in.h>
+#include <netdb.h>
 #endif
 #include <stdio.h>
 #include "protocol.h"
